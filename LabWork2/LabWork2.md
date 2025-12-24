@@ -118,39 +118,64 @@ Rel(api, legacy, "Миграция данных", "ODBC / CSV")
 
 Container(web, "Web Application", "React", "Frontend")
 ContainerDb(db, "Database", "PostgreSQL", "Storage")
+
+' Внешние системы
 System_Ext(bank, "Banking System", "Реестры оплат")
+System_Ext(legacy, "Legacy Access DB", "Старая база (Access)")
 
 Container_Boundary(api, "API Application") {
+    ' Контроллеры
     Component(auth_ctrl, "Auth Controller", "Controller", "Вход в систему")
     Component(req_ctrl, "Requests Controller", "Controller", "Работа с заявками")
     Component(sub_ctrl, "Subscribers Controller", "Controller", "Работа с абонентами")
     Component(bill_ctrl, "Billing Controller", "Controller", "Финансы и импорт")
 
+    ' Сервисы
     Component(sec_serv, "Security Service", "Service", "Проверка прав, JWT")
     Component(req_serv, "Request Service", "Service", "Распределение заявок")
     Component(bill_serv, "Billing Service", "Service", "Обработка платежей")
+    Component(sub_serv, "Subscriber Service", "Service", "Логика управления абонентами")
+    Component(mig_serv, "Migration Service", "Service", "Импорт исторических данных")
 
+    ' Репозитории
+    Component(repo_user, "User Repository", "Repository", "Доступ к учетным записям")
     Component(repo_req, "Request Repository", "Repository", "CRUD заявок")
     Component(repo_sub, "Subscriber Repository", "Repository", "CRUD абонентов")
     Component(repo_bill, "Billing Repository", "Repository", "CRUD платежей")
 
+    ' --- СВЯЗИ ---
+
+    ' Web -> Контроллеры
     Rel(web, auth_ctrl, "Login")
     Rel(web, req_ctrl, "Manage Requests")
     Rel(web, sub_ctrl, "Manage Subscribers")
     Rel(web, bill_ctrl, "Upload Payments")
     
+    ' Контроллеры -> Сервисы
     Rel(auth_ctrl, sec_serv, "Uses")
     Rel(req_ctrl, req_serv, "Uses")
     Rel(bill_ctrl, bill_serv, "Uses")
-    Rel(sub_ctrl, repo_sub, "Uses")
-
+    Rel(sub_ctrl, sub_serv, "Uses")
+    
+    ' Взаимодействие с Внешними Системами
     Rel(bill_ctrl, bank, "Импорт реестров") 
+    Rel(mig_serv, legacy, "Чтение данных (ODBC)")
 
+    ' Сервисы -> Репозитории
+    Rel(sec_serv, repo_user, "Uses")
     Rel(req_serv, repo_req, "Uses")
     Rel(bill_serv, repo_bill, "Uses")
-    Rel(bill_serv, repo_sub, "Uses", "Обновление баланса")
+    Rel(sub_serv, repo_sub, "Uses")
+    
+    ' Сервис миграции сохраняет данные через репозитории
+    Rel(mig_serv, repo_sub, "Импорт абонентов")
+
+    ' Межсервисное взаимодействие
+    Rel(bill_serv, repo_sub, "Обновление баланса")
 }
 
+' Репозитории -> БД
+Rel(repo_user, db, "SQL")
 Rel(repo_req, db, "SQL")
 Rel(repo_sub, db, "SQL")
 Rel(repo_bill, db, "SQL")
