@@ -272,7 +272,7 @@ public async Task<RequestDto> CreateRequestAsync(CreateRequestDto dto)
 
 ---
 
-## Дополнительные принципы разработки (Повышенная сложность)
+## Дополнительные принципы разработки
 
 ### 1. BDUF (Big Design Up Front - Масштабное проектирование прежде всего)
 *   **Решение:** **Отказываемся**.
