@@ -76,6 +76,7 @@ System_Boundary(c1, "Intercom CRM") {
 }
 
 System_Ext(bank, "Banking System", "Реестры оплат")
+System_Ext(legacy, "Legacy Access DB", "Старая база данных (исторические данные)")
 
 Rel(disp, web_app, "HTTPS")
 Rel(admin, web_app, "HTTPS")
@@ -85,6 +86,7 @@ Rel(web_app, api, "API Calls", "REST / JSON")
 
 Rel(api, db, "SQL (TCP)")
 Rel(api, bank, "Импорт файлов / API")
+Rel(api, legacy, "Миграция данных", "ODBC / CSV")
 @enduml
 ```
 
